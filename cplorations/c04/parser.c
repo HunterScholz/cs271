@@ -50,6 +50,6 @@ void parse(FILE * file){
 		if(!*line){
 			continue;
 		}
-		printf("%s \n", line);
+		printf("%s\n", line);
 	}
 }
