@@ -48,7 +48,7 @@ void parse(FILE * file){
 	unsigned int line_num = 0;
 	unsigned int instr_num = 0;
 	
-	//Time Travel Symbol Finder Loop
+	//Time Travel Symbol Finder
 	add_predefined_symbols();
 	while (fgets(line, sizeof(line), file)){
 		line_num++;
