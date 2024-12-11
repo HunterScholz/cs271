@@ -197,12 +197,16 @@ void assemble(const char * file_name, instruction* instructions, int num_instruc
 		if(instructions[i].field == Atype){
             if(instructions[i].instr.a.is_addr){op = instructions[i].instr.a.type.address;}
             else{
-				if(symtable_find(instructions[i].instr.a.type.label) == NULL){
+				char* label = instructions[i].instr.a.type.label;
+                if (symtable_find(label) == NULL) {
+                    symtable_insert(label, new);
                     op = new;
-                    symtable_insert(instructions[i].instr.a.type.label, new);
                     new++;
-                }else{op = instructions[i].instr.a.type.address;}
-                free(instructions[i].instr.a.type.label);
+                } else {
+					struct Symbol* symbol = symtable_find(label);
+					op = symbol->addr;
+				}
+				free((void *)label);
             }
         }
         else if(instructions[i].field == Ctype){op = instruction_to_opcode(instructions[i].instr.c);}
@@ -211,47 +215,6 @@ void assemble(const char * file_name, instruction* instructions, int num_instruc
 	fclose(fout);
 	fclose(fin);
 }
-
-/*
-void assemble(const char * file_name, instruction* instructions, int num_instructions){
-    const char* suffix = ".hack";
-    
-    FILE* fin = fopen(file_name, "r");
-    size_t len = strlen(file_name) + strlen(suffix) + 1;
-    char* output_file_name = malloc(len * sizeof(char)); 
-    strcpy(output_file_name, file_name);
-    strcat(output_file_name, suffix);
-    FILE* fout = fopen( output_file_name,"w");
-    
-    opcode op = 0;
-    int new = 16;
-    for(int i = 0; i < num_instructions; i++){
-        if(instructions[i].instruction_type == AType){
-            if(instructions[i].instr.a.is_addr){
-                op = instructions[i].instr.a.type.address;
-            }
-            else{
-                if(symtable_find(instructions[i].instr.a.type.label) == NULL){
-                    op = new;
-                    symtable_insert(instructions[i].instr.a.type.label, new);
-                    new++;
-                }
-                else{
-                    op = instructions[i].instr.a.type.address;
-                }
-                free(instructions[i].instr.a.type.label);
-            }
-        }
-        else if(instructions[i].instruction_type == CType){
-            op = instruction_to_opcode(instructions[i].instr.c);
-        }
-        fprintf(fout, "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n", OPCODE_TO_BINARY(op));
-        
-    }
-    fclose(fout);
-    fclose(fin);
-}
-﻿*/
 
 opcode instruction_to_opcode(c_instruction instr){
 	opcode op = 0;
