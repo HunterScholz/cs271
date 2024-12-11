@@ -1,0 +1,3 @@
+Code correctly assembles assembly code and coverts to binary. 
+Includes C-Type and A-Type instructions.
+Binary code is written onto a new .hack file of the same name.
