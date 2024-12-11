@@ -85,9 +85,9 @@ int parse(FILE * file, instruction *instructions){
 			instr_type = 'A';
 			instr.field = Atype;
 			if(instr.instr.a.is_addr){
-				printf("A: %d\n", instr.instr.a.type.address);
+				//printf("A: %d\n", instr.instr.a.type.address);
 			} else {
-				printf("A: %s\n", instr.instr.a.type.label);
+				//printf("A: %s\n", instr.instr.a.type.label);
 			}
 		} else if(is_Ctype(line)){
 			instr_type = 'C';
@@ -99,7 +99,7 @@ int parse(FILE * file, instruction *instructions){
 			if(instr.instr.c.jump == JMP_INVALID){exit_program(EXIT_INVALID_C_JUMP, line_num, line);}
 			if(instr.instr.c.comp == COMP_INVALID){exit_program(EXIT_INVALID_C_COMP, line_num, line);}
 			
-			printf("C: d=%d, c=%d, j=%d\n", instr.instr.c.dest, instr.instr.c.comp, instr.instr.c.jump);
+			//printf("C: d=%d, c=%d, j=%d\n", instr.instr.c.dest, instr.instr.c.comp, instr.instr.c.jump);
 		}
 		//printf("%u: %c  %s\n", instr_num, instr_type, line);
 		instructions[instr_num++] = instr;
@@ -182,8 +182,7 @@ void parse_C_instruction(char *line, c_instruction *instr){
 	instr->a = a;
 }
 
-void assemble(const char * file_name, instruction* instructions, int num_instructions){
-	
+void assemble(const char * file_name, instruction* instructions, int num_instructions){	
 	const char* hack = ".hack";
     FILE* fin = fopen(file_name, "r");
     size_t len = strlen(file_name) + strlen(hack) + 1;
@@ -195,22 +194,64 @@ void assemble(const char * file_name, instruction* instructions, int num_instruc
 	opcode op = 0;
 	int new = 16;
 	for(int i = 0 ; i < num_instructions ; i++){
-		if(instructions[i].instr.a.is_addr){
-			op = instructions[i].instr.a.type.address;
-		} else if(!instructions[i].instr.a.is_addr){
-			if(symtable_find(instructions[i].instr.a.type.label) == NULL){
-				op = new;
-				symtable_insert(instructions[i].instr.a.type.label, op);
-				new++;
-			} else {op = instructions[i].instr.a.type.address;}
-			free(instructions[i].instr.a.type.label);
-		} else if(instructions[i].field == Ctype){
-			op = instruction_to_opcode(instructions[i].instr.c);
-		}
+		if(instructions[i].field == Atype){
+            if(instructions[i].instr.a.is_addr){op = instructions[i].instr.a.type.address;}
+            else{
+				if(symtable_find(instructions[i].instr.a.type.label) == NULL){
+                    op = new;
+                    symtable_insert(instructions[i].instr.a.type.label, new);
+                    new++;
+                }else{op = instructions[i].instr.a.type.address;}
+                free(instructions[i].instr.a.type.label);
+            }
+        }
+        else if(instructions[i].field == Ctype){op = instruction_to_opcode(instructions[i].instr.c);}
 		fprintf(fout, "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n", OPCODE_TO_BINARY(op));
 	}
+	fclose(fout);
 	fclose(fin);
 }
+
+/*
+void assemble(const char * file_name, instruction* instructions, int num_instructions){
+    const char* suffix = ".hack";
+    
+    FILE* fin = fopen(file_name, "r");
+    size_t len = strlen(file_name) + strlen(suffix) + 1;
+    char* output_file_name = malloc(len * sizeof(char)); 
+    strcpy(output_file_name, file_name);
+    strcat(output_file_name, suffix);
+    FILE* fout = fopen( output_file_name,"w");
+    
+    opcode op = 0;
+    int new = 16;
+    for(int i = 0; i < num_instructions; i++){
+        if(instructions[i].instruction_type == AType){
+            if(instructions[i].instr.a.is_addr){
+                op = instructions[i].instr.a.type.address;
+            }
+            else{
+                if(symtable_find(instructions[i].instr.a.type.label) == NULL){
+                    op = new;
+                    symtable_insert(instructions[i].instr.a.type.label, new);
+                    new++;
+                }
+                else{
+                    op = instructions[i].instr.a.type.address;
+                }
+                free(instructions[i].instr.a.type.label);
+            }
+        }
+        else if(instructions[i].instruction_type == CType){
+            op = instruction_to_opcode(instructions[i].instr.c);
+        }
+        fprintf(fout, "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n", OPCODE_TO_BINARY(op));
+        
+    }
+    fclose(fout);
+    fclose(fin);
+}
+﻿*/
 
 opcode instruction_to_opcode(c_instruction instr){
 	opcode op = 0;

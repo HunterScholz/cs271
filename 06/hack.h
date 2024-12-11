@@ -31,7 +31,7 @@
   (opcode & 0x8 ? '1' : '0'), \
   (opcode & 0x4 ? '1' : '0'), \
   (opcode & 0x2 ? '1' : '0'), \
-  (opcode & 0x1 ? '1' : '0'),
+  (opcode & 0x1 ? '1' : '0')
 
 enum symbol_id {
 	SYM_R0 = 0,
